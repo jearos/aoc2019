@@ -1,15 +1,15 @@
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
-[![Build Status](https://travis-ci.org/bsamseth/cpp-project.svg?branch=master)](https://travis-ci.org/bsamseth/cpp-project)
-[![Build status](https://ci.appveyor.com/api/projects/status/g9bh9kjl6ocvsvse/branch/master?svg=true)](https://ci.appveyor.com/project/bsamseth/cpp-project/branch/master)
-[![Coverage Status](https://coveralls.io/repos/github/bsamseth/cpp-project/badge.svg?branch=master)](https://coveralls.io/github/bsamseth/cpp-project?branch=master)
-[![codecov](https://codecov.io/gh/bsamseth/cpp-project/branch/master/graph/badge.svg)](https://codecov.io/gh/bsamseth/cpp-project)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/eb004322b0d146239a57eb242078e179)](https://www.codacy.com/app/bsamseth/cpp-project?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=bsamseth/cpp-project&amp;utm_campaign=Badge_Grade)
-[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/bsamseth/cpp-project.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/bsamseth/cpp-project/context:cpp)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/bsamseth/cpp-project.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/bsamseth/cpp-project/alerts/)
-[![license](https://img.shields.io/badge/license-Unlicense-blue.svg)](https://github.com/bsamseth/cpp-project/blob/master/LICENSE)
-[![Lines of Code](https://tokei.rs/b1/github/bsamseth/cpp-project)](https://github.com/Aaronepower/tokei).
-[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/bsamseth/cpp-project.svg)](http://isitmaintained.com/project/bsamseth/cpp-project "Average time to resolve an issue")
-[![Percentage of issues still open](http://isitmaintained.com/badge/open/bsamseth/cpp-project.svg)](http://isitmaintained.com/project/bsamseth/cpp-project "Percentage of issues still open")
+[![Build Status](https://travis-ci.org/jearos/aoc2019.svg?branch=master)](https://travis-ci.org/jearos/aoc2019)
+[![Build status](https://ci.appveyor.com/api/projects/status/g9bh9kjl6ocvsvse/branch/master?svg=true)](https://ci.appveyor.com/project/jearos/aoc2019/branch/master)
+[![Coverage Status](https://coveralls.io/repos/github/jearos/aoc2019/badge.svg?branch=master)](https://coveralls.io/github/jearos/aoc2019?branch=master)
+[![codecov](https://codecov.io/gh/jearos/aoc2019/branch/master/graph/badge.svg)](https://codecov.io/gh/jearos/aoc2019)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/eb004322b0d146239a57eb242078e179)](https://www.codacy.com/app/jearos/aoc2019?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jearos/aoc2019&amp;utm_campaign=Badge_Grade)
+[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/jearos/aoc2019.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jearos/aoc2019/context:cpp)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/jearos/aoc2019.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jearos/aoc2019/alerts/)
+[![license](https://img.shields.io/badge/license-Unlicense-blue.svg)](https://github.com/jearos/aoc2019/blob/master/LICENSE)
+[![Lines of Code](https://tokei.rs/b1/github/jearos/aoc2019)](https://github.com/Aaronepower/tokei).
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/jearos/aoc2019.svg)](http://isitmaintained.com/project/jearos/aoc2019 "Average time to resolve an issue")
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/jearos/aoc2019.svg)](http://isitmaintained.com/project/jearos/aoc2019 "Percentage of issues still open")
 
 # Boiler plate for C++ projects 
 
@@ -88,7 +88,7 @@ upload this to Coveralls.io and/or Codecov.io
 When starting a new project, you probably don't want the history of this repository. To start fresh you can use
 the [setup script](setup.sh) as follows:
 ``` bash
-> git clone https://github.com/bsamseth/cpp-project  # Or use ssh-link if you like.
+> git clone https://github.com/jearos/aoc2019  # Or use ssh-link if you like.
 > cd cpp-project
 > sh setup.sh
 ```
