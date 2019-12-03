@@ -41,6 +41,7 @@ set(SOURCES          # All .cpp files in src/
     src/example.cpp
     src/day1.cpp
     src/day2.cpp
+    src/day3.cpp
 )
 set(TESTFILES        # All .cpp files in tests/
     tests/main.cpp
