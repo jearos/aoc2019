@@ -10,7 +10,7 @@
 #include <map>
 using namespace std;
 
-static int getNumberOfOrbits(std::map<string, string>& orbits, string planet, int &sum)
+static void getNumberOfOrbits(std::map<string, string>& orbits, string planet, int &sum)
 {
     if(orbits[planet] != "")
     {
@@ -18,7 +18,6 @@ static int getNumberOfOrbits(std::map<string, string>& orbits, string planet, in
         getNumberOfOrbits(orbits, orbits[planet], sum);
         sum++;
     }
-    return 1;
 }
 
 static int getSumFromFile(std::string filename)
@@ -44,11 +43,11 @@ static int getSumFromFile(std::string filename)
     return sum;
 }
 
-static int getNumberOfOrbitFromTo(std::map<string, string>& orbits, string planet, int &sum, string to)
+static bool getNumberOfOrbitFromTo(std::map<string, string>& orbits, string planet, int &sum, string to)
 {
     if(orbits[planet] == "")
     {
-        return 0;
+        return false;
     }
     else if(orbits[planet] != to)
     {
@@ -56,7 +55,7 @@ static int getNumberOfOrbitFromTo(std::map<string, string>& orbits, string plane
         sum++;
         return getNumberOfOrbitFromTo(orbits, orbits[planet], sum, to);
     }
-    return 1;
+    return true;
 }
 
 static int getOrbitsFromFile(std::string filename)
@@ -77,8 +76,6 @@ static int getOrbitsFromFile(std::string filename)
     sum = 0;
 
     int minSum = INT_MAX;
-    //cout << getNumberOfOrbitFromTo(orbits, "YOU", sum, "D");
-    //cout << getNumberOfOrbitFromTo(orbits, "SAN", sum, "D");
 
     for( auto orbit : orbits )
     {
