@@ -43,7 +43,7 @@ set(SOURCES          # All .cpp files in src/
 #    src/day2.cpp
 #    src/day3.cpp
 #    src/day4.cpp
-#    src/day5.cpp
+    src/day5.cpp
 #    src/day6.cpp
 #    src/day7.cpp
 #    src/day8.cpp

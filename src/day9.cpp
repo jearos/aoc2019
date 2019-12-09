@@ -7,69 +7,92 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <map>
 
 using namespace std;
 
-static int& getParam(vector<int>& prg, unsigned long pc, int mode)
+#if !defined(__SIZEOF_INT128__)
+    #error No int128
+#else
+typedef __int128 mem_t;
+#endif
+
+static mem_t& getParam(map<mem_t, mem_t>& prg, mem_t pc, mem_t mode, mem_t relative_base)
 {
-    unsigned long val = mode ? pc:static_cast<unsigned long>(prg[pc]);
-    return prg[val];
+    if(mode == 2)
+    {
+        return prg[relative_base+prg[pc]];
+    }
+    else if(mode == 1)
+    {
+        return prg[pc];
+    }
+    else
+    {
+        return prg[prg[pc]];
+    }
 }
-static int runProgram(string str, const int input[])
+
+static void runProgram(string str, vector<mem_t>& input, vector<mem_t>& output)
 {
-    vector<int> prg;
+//    vector<mem_t> prg;
+    map<mem_t, mem_t> prg;
     stringstream ss(str);
     string instrStr;
-    int value;
-    int input_index = 0;
-    int output = 0;
+    mem_t value;
+    unsigned long input_index = 0;
+    unsigned long step = 0;
 
     while(getline(ss,instrStr,','))
     {
-        value = atoi(instrStr.c_str());
-        prg.push_back(value);
+        value = atoll(instrStr.c_str());
+        prg[step++] = value;
     }
-    unsigned long pc = 0;
-    int i = 0;
+    mem_t pc = 0;
+    mem_t rb = 0;
+    //int i = 0;
 
-    while(i++<100000)
+    while(true)
     {
-        int instr = prg[pc];
-        int opcode = instr%100;
-        int imm1 = (instr/100)%10;
-        int imm2 = (instr/1000)%10;
-        int imm3 = (instr/1000)%10;
+        mem_t instr = prg[pc];
+        mem_t opcode = instr%100;
+        mem_t imm1 = (instr/100)%10;
+        mem_t imm2 = (instr/1000)%10;
+        mem_t imm3 = (instr/10000)%10;
 
 //        cout << pc << " " << instr << " " << opcode << endl;
 
         if(opcode == 99)
         {
-            return output;
+            return;
         }
         else if(opcode == 1)
         {
-            getParam(prg, pc+3, 0) = getParam(prg, pc+1, imm1) + getParam(prg, pc+2, imm2);
+            if(imm3 != 1)
+                getParam(prg, pc+3, imm3, rb) = getParam(prg, pc+1, imm1, rb) + getParam(prg, pc+2, imm2, rb);
             pc += 4;
         }
         else if(opcode == 2)
         {
-            getParam(prg, pc+3, 0) = getParam(prg, pc+1, imm1) * getParam(prg, pc+2, imm2);
+            if(imm3 != 1)
+                getParam(prg, pc+3, imm3, rb) = getParam(prg, pc+1, imm1, rb) * getParam(prg, pc+2, imm2, rb);
             pc += 4;
         }
         else if(opcode == 3)
         {
-            getParam(prg, pc+1, imm3) = input[input_index++];
+            if(imm1 != 1)
+                getParam(prg, pc+1, imm1, rb) = input[input_index++];
             pc += 2;
         }
         else if(opcode == 4)
         {
-            output = getParam(prg, pc+1, imm1);
+            output.push_back(getParam(prg, pc+1, imm1, rb));
             pc += 2;
         }
         else if(opcode == 5)
         {
-            if(getParam(prg, pc+1, imm1) != 0)
-                pc = static_cast<unsigned long>(getParam(prg, pc+2, imm2));
+            if(getParam(prg, pc+1, imm1, rb) != 0)
+                pc = (getParam(prg, pc+2, imm2, rb));
             else
             {
                 pc += 3;
@@ -77,8 +100,8 @@ static int runProgram(string str, const int input[])
         }
         else if(opcode == 6)
         {
-            if(getParam(prg, pc+1, imm1) == 0)
-                pc = static_cast<unsigned long>(getParam(prg, pc+2, imm2));
+            if(getParam(prg, pc+1, imm1, rb) == 0)
+                pc = getParam(prg, pc+2, imm2, rb);
             else
             {
                 pc += 3;
@@ -86,300 +109,85 @@ static int runProgram(string str, const int input[])
         }
         else if(opcode == 7)
         {
-            if(getParam(prg, pc+1, imm1) < getParam(prg, pc+2, imm2))
-                getParam(prg, pc+3, 0) = 1;
-            else
-                getParam(prg, pc+3, 0) = 0;
+            if(imm3 != 1)
+            {
+                if(getParam(prg, pc+1, imm1, rb) < getParam(prg, pc+2, imm2, rb))
+                        getParam(prg, pc+3, imm3, rb) = 1;
+                else
+                        getParam(prg, pc+3, imm3, rb) = 0;
+            }
             pc += 4;
         }
         else if(opcode == 8)
         {
-            if(getParam(prg, pc+1, imm1) == getParam(prg, pc+2, imm2))
-                getParam(prg, pc+3, 0) = 1;
-            else
-                getParam(prg, pc+3, 0) = 0;
-            pc += 4;
-        }
-    }
-    return 0;
-}
-
-static int runFile(string filename, int input)
-{
-    int input_array[2];
-    input_array[1] = 0;
-    for(int i=0;i<5;i++)
-    {
-        int phase = input % 10;
-        input = input / 10;
-        input_array[0] = phase;
-
- //       cout << input << endl;
-//        cout << phase << endl;
-
-        ifstream file;
-        file.open(filename);
-        string line;
-        while(getline(file, line))
-        {
-            input_array[1] = runProgram(line, input_array);
-        }
-    }
-    return input_array[1];
-}
-
-static bool execute(std::vector<int>& prg, unsigned long& pc, vector<int> input, int& output)
-{
-    int i = 0;
-    while(i++<100000)
-    {
-        int instr = prg[pc];
-        int opcode = instr%100;
-        int imm1 = (instr/100)%10;
-        int imm2 = (instr/1000)%10;
-        int imm3 = (instr/1000)%10;
-
-        if(opcode == 99)
-        {
-            return true;
-        }
-        else if(opcode == 1)
-        {
-            unsigned long param1 = imm1 ? pc+1:static_cast<unsigned long>(prg[pc+1]);
-            unsigned long param2 = imm2 ? pc+2:static_cast<unsigned long>(prg[pc+2]);
-            unsigned long param3 = static_cast<unsigned long>(prg[pc+3]);
-            prg[param3] = prg[param1] + prg[param2];
-            pc += 4;
-        }
-        else if(opcode == 2)
-        {
-            unsigned long param1 = imm1 ? pc+1:static_cast<unsigned long>(prg[pc+1]);
-            unsigned long param2 = imm2 ? pc+2:static_cast<unsigned long>(prg[pc+2]);
-            unsigned long param3 = static_cast<unsigned long>(prg[pc+3]);
-            prg[param3] = prg[param1] * prg[param2];
-            pc += 4;
-        }
-        else if(opcode == 3)
-        {
-            unsigned long param1 = imm3 ? pc+1:static_cast<unsigned long>(prg[pc+1]);
-            if(!input.empty())
+            if(imm3 != 1)
             {
-                prg[param1] = input.back();
-                input.pop_back();
-                pc += 2;
+                if(getParam(prg, pc+1, imm1, rb) == getParam(prg, pc+2, imm2, rb))
+                    getParam(prg, pc+3, imm3, rb) = 1;
+                else
+                    getParam(prg, pc+3, imm3, rb) = 0;
             }
-            else
-            {
-                return false;
-            }
+            pc += 4;
         }
-        else if(opcode == 4)
+        else if(opcode == 9)
         {
-            unsigned long param1 = imm1 ? pc+1:static_cast<unsigned long>(prg[pc+1]);
-            output = prg[param1];
+            rb += getParam(prg, pc+1, imm1, rb);
             pc += 2;
-            return false;
         }
-        else if(opcode == 5)
-        {
-            unsigned long param1 = imm1 ? pc+1:static_cast<unsigned long>(prg[pc+1]);
-            unsigned long param2 = imm2 ? pc+2:static_cast<unsigned long>(prg[pc+2]);
-            if(prg[param1] != 0)
-                pc = static_cast<unsigned long>(prg[param2]);
-            else
-            {
-                pc += 3;
-            }
-        }
-        else if(opcode == 6)
-        {
-            unsigned long param1 = imm1 ? pc+1:static_cast<unsigned long>(prg[pc+1]);
-            unsigned long param2 = imm2 ? pc+2:static_cast<unsigned long>(prg[pc+2]);
-            if(prg[param1] == 0)
-                pc = static_cast<unsigned long>(prg[param2]);
-            else
-            {
-                pc += 3;
-            }
-        }
-        else if(opcode == 7)
-        {
-            unsigned long param1 = imm1 ? pc+1:static_cast<unsigned long>(prg[pc+1]);
-            unsigned long param2 = imm2 ? pc+2:static_cast<unsigned long>(prg[pc+2]);
-            unsigned long param3 = static_cast<unsigned long>(prg[pc+3]);
-            if(prg[param1] < prg[param2])
-                prg[param3] = 1;
-            else
-                prg[param3] = 0;
-            pc += 4;
-        }
-        else if(opcode == 8)
-        {
-            unsigned long param1 = imm1 ? pc+1:static_cast<unsigned long>(prg[pc+1]);
-            unsigned long param2 = imm2 ? pc+2:static_cast<unsigned long>(prg[pc+2]);
-            unsigned long param3 = static_cast<unsigned long>(prg[pc+3]);
-            if(prg[param1] == prg[param2])
-                prg[param3] = 1;
-            else
-                prg[param3] = 0;
-            pc += 4;
-        }
-    }
-    return false;
-}
-static int runProgram2(string str, int input, int &output)
-{
-    vector<int> input_array;
-
-    input_array.push_back(0);
-
-    vector<int> prg_[5];
-    stringstream ss(str);
-    string instrStr;
-    int value;
-
-    while(getline(ss,instrStr,','))
-    {
-        value = atoi(instrStr.c_str());
-        prg_[0].push_back(value);
-        prg_[1].push_back(value);
-        prg_[2].push_back(value);
-        prg_[3].push_back(value);
-        prg_[4].push_back(value);
-    }
-    unsigned long pc_[5] = {0};
-    int i = 0;
-    bool firstTime = true;
-    input_array[1] = 0;
-    while(1)
-    {
-        int phase = input;
-        int stopCount = 0;
-        for(i=0;i<5;i++)
-        {
-            if(firstTime)
-            {
-                int digit = phase % 10;
-                phase = phase / 10;
-                input_array.push_back(digit);
-            }
-            if(execute(prg_[i], pc_[i], input_array, output))
-            {
-                stopCount++;
-                //cout << stopCount;
-                if(stopCount == 5)
-                {
-                    return output;
-                }
-            }
-            if(firstTime)
-            {
-                input_array.push_back(output);
-            }
-            else
-            {
-                input_array.push_back(output);
-            }
-        }
-        if(firstTime) firstTime = false;
-
     }
 }
 
-static int runFile2(string filename, int input)
+static long runFile(string filename, vector<mem_t>& input, vector<mem_t>& output)
 {
-    int output = 0;
     ifstream file;
     file.open(filename);
     string line;
     while(getline(file, line))
     {
-        return(runProgram2(line, input, output));
+        runProgram(line, input, output);
     }
     return 0;
 }
 
-static int testCombinations(string filename)
-{
-    int maxOutput = INT_MIN;
-    for(int i=0;i<=4;i++)
-    {
-        for(int j=0;j<=4;j++)
-        {
-            for(int k=0;k<=4;k++)
-            {
-                for(int l=0;l<=4;l++)
-                {
-                    for(int m=0;m<=4;m++)
-                    {
-                        if( (i!=j&&i!=k&&i!=l&&i!=m) &&
-                            (j!=i&&j!=k&&j!=l&&j!=m) &&
-                            (k!=i&&k!=j&&k!=l&&k!=m) &&
-                            (l!=i&&l!=j&&l!=k&&l!=m) &&
-                            (m!=i&&m!=j&&m!=k&&m!=l) )
 
-                        {
-                            int input = 10000*i+1000*j+100*k+10*l+m;
-                            int output = runFile2(filename, input);
-                            if(output > maxOutput)
-                            {
-//                                cout << input << endl;
-                                maxOutput = output;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return maxOutput;
-}
-
-static int testCombinations2(string filename)
-{
-    int maxOutput = INT_MIN;
-    for(int i=5;i<=9;i++)
-    {
-        for(int j=5;j<=9;j++)
-        {
-            for(int k=5;k<=9;k++)
-            {
-                for(int l=5;l<=9;l++)
-                {
-                    for(int m=5;m<=9;m++)
-                    {
-                        if( (i!=j&&i!=k&&i!=l&&i!=m) &&
-                            (j!=i&&j!=k&&j!=l&&j!=m) &&
-                            (k!=i&&k!=j&&k!=l&&k!=m) &&
-                            (l!=i&&l!=j&&l!=k&&l!=m) &&
-                            (m!=i&&m!=j&&m!=k&&m!=l) )
-
-                        {
-                            int input = 10000*i+1000*j+100*k+10*l+m;
-                            int output = runFile2(filename, input);
-                            if(output > maxOutput)
-                            {
-//                                cout << input << endl;
-                                maxOutput = output;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return maxOutput;
-}
 TEST_CASE("test")
 {
-    CHECK(runFile("../tests/day7_ut1.txt", 1234) == 43210);
-    CHECK(runFile("../tests/day7_ut2.txt", 43210) == 54321);
-    CHECK(runFile("../tests/day7_ut3.txt", 23401) == 65210);
-    CHECK(testCombinations("../tests/day7.txt") == 422858);
-}
-TEST_CASE("test2")
-{
-    CHECK(runFile2("../tests/day7_ut4.txt", 56789) == 139629729);
-    CHECK(runFile2("../tests/day7_ut5.txt", 65879) == 18216);
-    CHECK(testCombinations2("../tests/day7.txt") == 14897241);
+    vector<mem_t> input;
+    vector<mem_t> output;
+
+    input.clear();
+    output.clear();
+    mem_t test_ary[] = {109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99};
+    runProgram("109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99", input, output);
+    for(unsigned long i=0;i<16;i++)
+        CHECK( static_cast<long>(output[i]) == static_cast<long>(test_ary[i]));
+
+    input.clear();
+    output.clear();
+    runProgram("1102,34915192,34915192,7,4,7,99,0", input, output);
+    CHECK( static_cast<long>(output[0]) == 1219070632396864);
+    input.clear();
+    output.clear();
+    runProgram("104,1125899906842624,99", input, output);
+    CHECK( static_cast<long>(output[0]) == 1125899906842624);
+    input.clear();
+    output.clear();
+    input.push_back(1);
+    runFile("../tests/day9.txt", input, output);
+    CHECK( output.size() == 1);
+/*
+    for(unsigned long i=0;i<output.size();i++)
+    {
+        cout << "Failure:" << static_cast<long>(output[i]) << endl;
+    }
+*/
+    CHECK(static_cast<long>(output[0]) == 3380552333);
+
+    input.clear();
+    output.clear();
+    input.push_back(2);
+    runFile("../tests/day9.txt", input, output);
+    CHECK( output.size() == 1);
+    CHECK(static_cast<long>(output[0]) == 78831);
+
 }
