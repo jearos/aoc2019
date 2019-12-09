@@ -35,7 +35,6 @@ static mem_t& getParam(map<mem_t, mem_t>& prg, mem_t pc, mem_t mode, mem_t relat
 
 static void runProgram(string str, vector<mem_t>& input, vector<mem_t>& output)
 {
-//    vector<mem_t> prg;
     map<mem_t, mem_t> prg;
     stringstream ss(str);
     string instrStr;
@@ -50,7 +49,6 @@ static void runProgram(string str, vector<mem_t>& input, vector<mem_t>& output)
     }
     mem_t pc = 0;
     mem_t rb = 0;
-    //int i = 0;
 
     while(true)
     {
@@ -112,9 +110,9 @@ static void runProgram(string str, vector<mem_t>& input, vector<mem_t>& output)
             if(imm3 != 1)
             {
                 if(getParam(prg, pc+1, imm1, rb) < getParam(prg, pc+2, imm2, rb))
-                        getParam(prg, pc+3, imm3, rb) = 1;
+                    getParam(prg, pc+3, imm3, rb) = 1;
                 else
-                        getParam(prg, pc+3, imm3, rb) = 0;
+                    getParam(prg, pc+3, imm3, rb) = 0;
             }
             pc += 4;
         }
